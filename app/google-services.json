@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "137832771690",
+    "firebase_url": "https://goods-agency-cef9a-default-rtdb.firebaseio.com",
+    "project_id": "goods-agency-cef9a",
+    "storage_bucket": "goods-agency-cef9a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:137832771690:android:7c9a70d494025a20189a13",
+        "android_client_info": {
+          "package_name": "com.jdm.goodsagency"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "137832771690-uvqu9fl0qj9kaf54gu4k80k7hmi94pgj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdLhJOeLOb3ieYQMnWn9-RXnsf4-bR_UI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "137832771690-uvqu9fl0qj9kaf54gu4k80k7hmi94pgj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
