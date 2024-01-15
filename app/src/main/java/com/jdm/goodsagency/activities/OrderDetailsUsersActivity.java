@@ -32,6 +32,7 @@ import java.util.Locale;
 public class OrderDetailsUsersActivity extends AppCompatActivity {
 
     private String orderTo,orderId;
+    public String deliveryFee;
 
     //ui views
     private ImageButton backBtn,writeReviewBtn;
@@ -130,10 +131,11 @@ public class OrderDetailsUsersActivity extends AppCompatActivity {
                         String orderId=""+dataSnapshot.child("orderId").getValue();
                         String orderStatus=""+dataSnapshot.child("orderStatus").getValue();
                         String orderTime=""+dataSnapshot.child("orderTime").getValue();
-                        String orderTo=""+dataSnapshot.child("orderTo").getValue();
-                        String deliveryFee=""+dataSnapshot.child("deliveryFee").getValue();
                         String latitude=""+dataSnapshot.child("latitude").getValue();
                         String longitude=""+dataSnapshot.child("longitude").getValue();
+                        String orderTo=""+dataSnapshot.child("orderTo").getValue();
+                        deliveryFee=""+dataSnapshot.child("deliveryFee").getValue();
+
 
                         //convert timestamp to proper format
                         Calendar calendar=Calendar.getInstance();
@@ -153,7 +155,7 @@ public class OrderDetailsUsersActivity extends AppCompatActivity {
                         //set data
                         orderIdTv.setText(orderId);
                         orderStatusTv.setText(orderStatus);
-                        amountTv.setText("Rs"+orderCost+ "[Including delivery fee Rs" +deliveryFee+ "]");
+                        amountTv.setText("Rs " + orderCost + " [Including delivery fee Rs " +deliveryFee);
                         dateTv.setText(formatedDate);
 
                         findAddress(latitude,longitude);
