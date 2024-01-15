@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -58,15 +59,6 @@ public class EditProductActivity extends AppCompatActivity {
 
     private String productId;
 
-    //permission constants
-    private static final int CAMERA_REQUEST_CODE=200;
-    private static final int STORAGE_REQUEST_CODE=300;
-    //image pick constants
-    private static final int IMAGE_PICK_GALLERY_CODE=400;
-    private static final int IMAGE_PICK_CAMERA_CODE=500;
-    //permission arrays
-    private String[] cameraPermissions;
-    private String[] storagePermissions;
     //image picked uri
     private Uri image_uri;
 
@@ -104,10 +96,6 @@ public class EditProductActivity extends AppCompatActivity {
         progressDialog=new ProgressDialog(this);
         progressDialog.setTitle("Please wait");
         progressDialog.setCanceledOnTouchOutside(false);
-
-        //init permission arrays
-        cameraPermissions=new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        storagePermissions=new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
         //if discountSwitch is checked: show discountPriceEt, discountNoteEt | if discountSwitch is not checked: hide discountPriceEt,discountNoteEt
         discountSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -371,132 +359,24 @@ public class EditProductActivity extends AppCompatActivity {
     }
 
     private void showImagePickDialog() {
-        //options to display Dialog
-        String[] options={"Camera","Gallery"};
-        //dialog
-        AlertDialog.Builder builder=new AlertDialog.Builder(this);
-        builder.setTitle("Pick Image")
-                .setItems(options, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //handle item clicks
-                        if (which==0){
-                            //camera clicked
-                            if (checkCameraPermission()){
-                                //permission granted
-                                pickFromCamera();
-                            }
-                            else{
-                                //permission not granted,request
-                                requestCameraPermission();
-                            }
-                        }
-                        else {
-                            //gallery clicked
-                            if (checkStoragePermission()){
-                                //permission granted
-                                pickFromGallery();
-                            }
-                            else {
-                                //permission not granted,request
-                                requestStoragePermission();
-                            }
-                        }
-                    }
-                })
-                .show();
+        ImagePicker.with(EditProductActivity.this)
+                .crop()	    			//Crop image(Optional), Check Customization for more option
+                .compress(1024)			//Final image size will be less than 1 MB(Optional)
+                .maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
+                .start();
     }
-    private void pickFromGallery(){
-        //intent to pick image from gallery
-        Intent intent=new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");
-        startActivityForResult(intent,IMAGE_PICK_GALLERY_CODE);
-    }
-    private void pickFromCamera(){
-        //intent to pick image from camera
-
-        //using media store to pick high/original quality image
-        ContentValues contentValues=new ContentValues();
-        contentValues.put(MediaStore.Images.Media.TITLE,"Temp_Image_Title");
-        contentValues.put(MediaStore.Images.Media.DESCRIPTION,"Temp_Image_Description");
-
-        image_uri=getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,contentValues);
-
-        Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT,image_uri);
-        startActivityForResult(intent,IMAGE_PICK_CAMERA_CODE);
-    }
-    private  boolean checkStoragePermission(){
-        boolean result= ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)==
-                (PackageManager.PERMISSION_GRANTED);
-        return result;//returns true or false
-    }
-    private void requestStoragePermission(){
-        ActivityCompat.requestPermissions(this,storagePermissions,STORAGE_REQUEST_CODE);
-    }
-    private boolean checkCameraPermission(){
-        boolean result=ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)==
-                (PackageManager.PERMISSION_GRANTED);
-
-        boolean result1=ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)==
-                (PackageManager.PERMISSION_GRANTED);
-        return result && result1;
-    }
-    private void requestCameraPermission(){
-        ActivityCompat.requestPermissions(this,cameraPermissions,CAMERA_REQUEST_CODE);
-    }
-
-    //handle permission results
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode){
-            case CAMERA_REQUEST_CODE:{
-                if (grantResults.length>0){
-                    boolean cameraAccepted=grantResults[0]==PackageManager.PERMISSION_GRANTED;
-                    boolean storageAccepted=grantResults[1]==PackageManager.PERMISSION_GRANTED;
-                    if (cameraAccepted && storageAccepted){
-                        //both permissions granted
-                        pickFromCamera();
-                    }
-                    else {
-                        //both or one of permissions denied
-                        Toast.makeText(this, "Camera & Storage permissions are required...", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-            case STORAGE_REQUEST_CODE:{
-                if (grantResults.length>0){
-                    boolean storageAccepted=grantResults[0]==PackageManager.PERMISSION_GRANTED;
-                    if (storageAccepted){
-                        //permission granted
-                        pickFromGallery();
-                    }
-                    else {
-                        //permission denied
-                        Toast.makeText(this, "Storage permission is required...", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
     //handle image pick results
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode==RESULT_OK){
-            if (requestCode==IMAGE_PICK_GALLERY_CODE){
-                //image picked from gallery
-                //save picked image uri
-                image_uri=data.getData();
-
-                //set image
-                productIconIv.setImageURI(image_uri);
-            }
-            else if (requestCode==IMAGE_PICK_CAMERA_CODE){
-                //image picked from camera
-                productIconIv.setImageURI(image_uri);
-            }
+        if (resultCode==RESULT_OK) {
+            //get picked image
+            image_uri = data.getData();
+            //set to imageview
+            productIconIv.setImageURI(image_uri);
+        }
+        else {
+            //set to imageview
+            Toast.makeText(this, "No Image selected", Toast.LENGTH_SHORT).show();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }

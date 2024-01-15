@@ -393,7 +393,7 @@ public class MainSellerActivity extends AppCompatActivity {
                             String profileImage=""+ds.child("profileImage").getValue();
 
                             //set data to ui
-                              nameTv.setText(name);
+                            nameTv.setText(name);
                             shopNameTv.setText(shopName);
                             emailTv.setText(email);
                             try{

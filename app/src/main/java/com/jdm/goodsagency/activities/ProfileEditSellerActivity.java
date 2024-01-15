@@ -30,6 +30,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -126,20 +127,6 @@ public class ProfileEditSellerActivity extends AppCompatActivity implements Loca
             }
         });
 
-        gpsBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //detect location
-                if(checkLocationPermission()){
-                    //already allowed
-                    detectLocation();
-                }
-                else {
-                    //not allowed,request
-                    requestLocationPermission();
-                }
-            }
-        });
 
         updateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -337,109 +324,13 @@ public class ProfileEditSellerActivity extends AppCompatActivity implements Loca
     }
 
     private void showImagePickDialog() {
-        //options  to display in dialog
-        String[] options={"Camera","Gallery"};
-        //dialog
-        AlertDialog.Builder builder=new AlertDialog.Builder(this);
-        builder.setTitle("Pick Image:")
-                .setItems(options, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //handle item clicks
-                        if (which==0){
-                            //camera clicked
-                            if (checkCameraPermission()){
-                                //allowed, open camera
-                                pickFromCamera();
-                            }
-                            else {
-                                //not allowed,request
-                                requestCameraPermission();
-                            }
-                        }
-                        else{
-                            //gallery clicked
-                            if(checkStoragePermission()){
-                                //allowed open Gallery
-                                pickFromGallery();
-                            }
-                            else {
-                                //not allowed request
-                                requestStoragePermission();
-                            }
-                        }
-                    }
-                })
-                .show();
+        ImagePicker.with(ProfileEditSellerActivity.this)
+                .crop()	    			//Crop image(Optional), Check Customization for more option
+                .compress(1024)			//Final image size will be less than 1 MB(Optional)
+                .maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
+                .start();
     }
 
-    private void requestStoragePermission() {
-        ActivityCompat.requestPermissions(this,storagePermissions,STORAGE_REQUEST_CODE);
-    }
-
-    private void requestCameraPermission() {
-        ActivityCompat.requestPermissions(this,cameraPermissions,CAMERA_REQUEST_CODE);
-    }
-
-    private void requestLocationPermission() {
-        ActivityCompat.requestPermissions(this,locationPermissions,LOCATION_REQUEST_CODE);
-    }
-
-    private boolean checkStoragePermission() {
-        boolean result=ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)==(PackageManager.PERMISSION_GRANTED);
-        return result;
-    }
-
-    private boolean checkCameraPermission() {
-        boolean result=ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)==(PackageManager.PERMISSION_GRANTED);
-        boolean result1=ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)==(PackageManager.PERMISSION_GRANTED);
-
-        return result && result1;
-    }
-
-    private boolean checkLocationPermission() {
-
-        boolean result=ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)==(PackageManager.PERMISSION_GRANTED);
-        return result;
-    }
-
-    private void pickFromGallery() {
-        //intent to pick image from gallery
-        Intent intent=new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");
-        startActivityForResult(intent,IMAGE_PICK_GALLERY_CODE);
-    }
-//    private void pickFromCamera() {
-//        //intent to pick image from camera
-//        ContentValues contentValues=new ContentValues();
-//        contentValues.put(MediaStore.Images.Media.TITLE,"Image Title");
-//        contentValues.put(MediaStore.Images.Media.DESCRIPTION,"Image description");
-//        image_uri=getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,contentValues);
-//        Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//        intent.putExtra(MediaStore.EXTRA_OUTPUT,image_uri);
-//        startActivityForResult(intent,IMAGE_PICK_CAMERA_CODE);
-//    }
-    private void pickFromCamera() {
-        // intent to pick image from camera
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.Images.Media.TITLE, "Image Title");
-        contentValues.put(MediaStore.Images.Media.DESCRIPTION, "Image description");
-
-        // check if image_uri is null before calling getContentResolver().insert()
-        if (image_uri == null) {
-            image_uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
-        }
-
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri);
-        startActivityForResult(intent, IMAGE_PICK_CAMERA_CODE);
-    }
-
-    private void detectLocation() {
-        Toast.makeText(this, "Please wait...", Toast.LENGTH_SHORT).show();
-        locationManager=(LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,this);
-    }
 
     private void findAddress() {
         //find address, country, state, city
@@ -485,69 +376,20 @@ public class ProfileEditSellerActivity extends AppCompatActivity implements Loca
         Toast.makeText(this, "Location is disabled...", Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode){
-            case LOCATION_REQUEST_CODE:{
-                if (grantResults.length>0){
-                    boolean locationAccepted=grantResults[0]==PackageManager.PERMISSION_GRANTED;
-                    if (locationAccepted){
-                        //permission allowed
-                        detectLocation();
-                    }
-                    else {
-                        //permission denied
-                        Toast.makeText(this, "Location permission is necessary...", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-            case CAMERA_REQUEST_CODE:{
-                if (grantResults.length>0){
-                    boolean cameraAccepted=grantResults[0]==PackageManager.PERMISSION_GRANTED;
-                    boolean storageAccepted=grantResults[1]==PackageManager.PERMISSION_GRANTED;
-                    if (cameraAccepted && storageAccepted){
-                        //permission allowed
-                        //System.out.println("log.d");
-                        pickFromCamera();
-                    }
-                    else{
-                        //permission denied
-                        Toast.makeText(this, "Camera permissions are necessary", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-            case STORAGE_REQUEST_CODE:{
-                if (grantResults.length>0){
-                    boolean storageAccepted=grantResults[1]==PackageManager.PERMISSION_GRANTED;
-                    if (storageAccepted){
-                        //permission allowed
-                        pickFromGallery();
-                    }
-                    else{
-                        //permission denied
-                        Toast.makeText(this, "Storage permission is necessary", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         //handle image pick result
-        if (resultCode==RESULT_OK){
-            if (resultCode==IMAGE_PICK_GALLERY_CODE){
-                //picked from gallery
-                image_uri=data.getData();
-                //set to imageview
-                profileIv.setImageURI(image_uri);
-            }
-            else if(requestCode==IMAGE_PICK_CAMERA_CODE){
-                profileIv.setImageURI(image_uri);
-            }
+        if (resultCode==RESULT_OK) {
+            //get picked image
+            image_uri = data.getData();
+            //set to imageview
+            profileIv.setImageURI(image_uri);
         }
-
+        else {
+            //set to imageview
+            Toast.makeText(this, "No Image selected", Toast.LENGTH_SHORT).show();
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 }
