@@ -48,6 +48,7 @@ public class OrderDetailsSellerActivity extends AppCompatActivity {
 
     //ui views
     private ImageButton backBtn, editBtn, mapBtn;
+    public String orderCost;
     private TextView orderIdTv, dateTv, orderStatusTv,emailTv, phoneTv, totalItemsTv, amountTv,addressTv;
     private RecyclerView itemsRv;
     String orderId,orderBy;
@@ -149,12 +150,11 @@ public class OrderDetailsSellerActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         String orderBy=""+dataSnapshot.child("orderBy").getValue();
-                        String orderCost=""+dataSnapshot.child("orderCost").getValue();
+                        orderCost=""+dataSnapshot.child("orderCost").getValue();
                         String orderId=""+dataSnapshot.child("orderId").getValue();
                         String orderStatus=""+dataSnapshot.child("orderStatus").getValue();
                         String orderTime=""+dataSnapshot.child("orderTime").getValue();
                         String orderTo=""+dataSnapshot.child("orderTo").getValue();
-                        String deliveryFee=""+dataSnapshot.child("deliveryFee").getValue();
                         String latitude=""+dataSnapshot.child("latitude").getValue();
                         String longitude=""+dataSnapshot.child("longitude").getValue();
 
@@ -174,7 +174,7 @@ public class OrderDetailsSellerActivity extends AppCompatActivity {
 
                         orderIdTv.setText(orderId);
                         orderStatusTv.setText(orderStatus);
-                        amountTv.setText("₹"+orderCost+"[Including delivery fee ₹"+deliveryFee+"]");
+                        amountTv.setText("₹ "+orderCost);
                         dateTv.setText(dateFormated);
 
                         findAddress(latitude,longitude);

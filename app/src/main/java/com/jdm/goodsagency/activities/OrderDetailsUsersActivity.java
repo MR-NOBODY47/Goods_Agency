@@ -32,7 +32,6 @@ import java.util.Locale;
 public class OrderDetailsUsersActivity extends AppCompatActivity {
 
     private String orderTo,orderId;
-    public String deliveryFee;
 
     //ui views
     private ImageButton backBtn,writeReviewBtn;
@@ -134,7 +133,7 @@ public class OrderDetailsUsersActivity extends AppCompatActivity {
                         String latitude=""+dataSnapshot.child("latitude").getValue();
                         String longitude=""+dataSnapshot.child("longitude").getValue();
                         String orderTo=""+dataSnapshot.child("orderTo").getValue();
-                        deliveryFee=""+dataSnapshot.child("deliveryFee").getValue();
+                        String address=""+dataSnapshot.child("address").getValue();
 
 
                         //convert timestamp to proper format
@@ -155,10 +154,11 @@ public class OrderDetailsUsersActivity extends AppCompatActivity {
                         //set data
                         orderIdTv.setText(orderId);
                         orderStatusTv.setText(orderStatus);
-                        amountTv.setText("Rs " + orderCost + " [Including delivery fee Rs " +deliveryFee);
+                        amountTv.setText("Rs " + orderCost);
                         dateTv.setText(formatedDate);
+                        addressTv.setText(address);
 
-                        findAddress(latitude,longitude);
+
                         }
 
                     @Override
@@ -186,21 +186,4 @@ public class OrderDetailsUsersActivity extends AppCompatActivity {
                 });
     }
 
-    private void findAddress(String latitude, String longitude) {
-        double lat=Double.parseDouble(latitude);
-        double lon=Double.parseDouble(longitude);
-
-        //find address, country, state, city
-        Geocoder geocoder;
-        List<Address> addresses;
-        geocoder=new Geocoder(this, Locale.getDefault());
-        try {
-            addresses=geocoder.getFromLocation(lat,lon,1);
-            String address=addresses.get(0).getAddressLine(0);//complete address
-            addressTv.setText(address);
-        }
-        catch (Exception e){
-
-        }
-    }
 }

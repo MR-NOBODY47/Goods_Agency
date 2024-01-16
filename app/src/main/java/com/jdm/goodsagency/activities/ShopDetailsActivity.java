@@ -68,7 +68,7 @@ public class ShopDetailsActivity extends AppCompatActivity {
     private RatingBar ratingBar;
 
     private String shopUid;
-    private String myLatitude,myLongitude,myPhone;
+    private String myPhone,userAddress;
     private String shopName,shopEmail,shopPhone,shopAddress,shopLatitude,shopLongitude;
     public String deliveryFee;
 
@@ -116,6 +116,7 @@ public class ShopDetailsActivity extends AppCompatActivity {
         progressDialog.setCanceledOnTouchOutside(false);
 
         shopUid=getIntent().getStringExtra("shopUid");
+        userAddress=getIntent().getStringExtra("useraddress");
         firebaseAuth=FirebaseAuth.getInstance();
         loadMyInfo();
         loadShopDetails();
@@ -329,8 +330,8 @@ public class ShopDetailsActivity extends AppCompatActivity {
         //set to recyclerView
         cartItemsRv.setAdapter(adapterCartItem);
 
-        dFeeTv.setText("₹"+deliveryFee);
-        sTotalTv.setText("₹"+String.format("%.2f",allTotalPrice));
+        dFeeTv.setText("₹ "+deliveryFee);
+        sTotalTv.setText("₹ "+String.format("%.2f",allTotalPrice));
         allTotalPriceTv.setText("₹"+(allTotalPrice+Double.parseDouble(deliveryFee.replace("₹",""))));
 
         //show dialog
@@ -350,7 +351,7 @@ public class ShopDetailsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //first validate delivery address
-                if (myLatitude.equals("")||myLatitude.equals("null")||myLongitude.equals("")||myLongitude.equals("null")){
+                if (userAddress.equals("")||userAddress.equals("null")){
                     //user didn't enter address in profile
                     Toast.makeText(ShopDetailsActivity.this, "Please enter your address in your profile before placing order...", Toast.LENGTH_SHORT).show();
                     return;//don't proceed further
@@ -388,8 +389,8 @@ public class ShopDetailsActivity extends AppCompatActivity {
         hashMap.put("orderCost",""+cost);
         hashMap.put("orderBy",""+firebaseAuth.getUid());
         hashMap.put("orderTo",""+shopUid);
-        hashMap.put("latitude",""+myLatitude);
-        hashMap.put("longitude",""+myLongitude);
+        hashMap.put("address",""+userAddress);
+
 
 
         //add to db
@@ -437,7 +438,7 @@ public class ShopDetailsActivity extends AppCompatActivity {
     private void openMap() {
         //saddr means source address
         //daddr means destination address
-        String address="https://maps.google.com/maps?saddr"+myLatitude+","+myLongitude+"&daddr"+shopLatitude+","+shopLongitude;
+        String address="https://maps.google.com/maps?saddr"+userAddress+"&daddr"+shopLatitude+","+shopLongitude;
         Intent intent=new Intent(Intent.ACTION_VIEW,Uri.parse(address));
         startActivity(intent);
     }
@@ -461,8 +462,7 @@ public class ShopDetailsActivity extends AppCompatActivity {
                             String profileImage=""+ds.child("profileImage").getValue();
                             String accountType=""+ds.child("accountType").getValue();
                             String city=""+ds.child("city").getValue();
-                            myLatitude=""+ds.child("latitude").getValue();
-                            myLongitude=""+ds.child("longitude").getValue();
+                            userAddress=""+ds.child("address").getValue();
                         }
                     }
 
