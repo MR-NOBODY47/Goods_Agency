@@ -157,6 +157,7 @@ public class OrderDetailsSellerActivity extends AppCompatActivity {
                         String orderTo=""+dataSnapshot.child("orderTo").getValue();
                         String latitude=""+dataSnapshot.child("latitude").getValue();
                         String longitude=""+dataSnapshot.child("longitude").getValue();
+                        String address=""+dataSnapshot.child("address").getValue();
 
                         Calendar calendar=Calendar.getInstance();
                         calendar.setTimeInMillis(Long.parseLong(orderTime));
@@ -176,8 +177,9 @@ public class OrderDetailsSellerActivity extends AppCompatActivity {
                         orderStatusTv.setText(orderStatus);
                         amountTv.setText("₹ "+orderCost);
                         dateTv.setText(dateFormated);
+                        addressTv.setText(address);
 
-                        findAddress(latitude,longitude);
+
                     }
 
                     @Override
@@ -187,22 +189,7 @@ public class OrderDetailsSellerActivity extends AppCompatActivity {
                 });
     }
 
-    private void findAddress(String latitude, String longitude) {
-        double lat=Double.parseDouble(latitude);
-        double lon=Double.parseDouble(longitude);
 
-        Geocoder geocoder;
-        List<Address> addresses;
-        geocoder=new Geocoder(this, Locale.getDefault());
-        try {
-            addresses=geocoder.getFromLocation(lat,lon,1);
-            String address=addresses.get(0).getAddressLine(0);
-            addressTv.setText(address);
-        }
-        catch (Exception e){
-            Toast.makeText(this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-    }
 
     private void loadOrderedItems(){
         orderedItemArrayList=new ArrayList<>();
