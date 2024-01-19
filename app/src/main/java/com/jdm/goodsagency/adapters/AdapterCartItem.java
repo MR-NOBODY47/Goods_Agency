@@ -50,9 +50,9 @@ public class AdapterCartItem extends RecyclerView.Adapter<AdapterCartItem.Holder
 
         //set data
         holder.itemTitleTv.setText(""+title);
-        holder.itemPriceTv.setText(""+cost);
-        holder.itemQuantityTv.setText("["+quantity+"]");//eg.[3]
-        holder.itemPriceEachTv.setText(""+price);
+        holder.itemPriceTv.setText("₹ "+cost);
+        holder.itemQuantityTv.setText("X "+quantity);//eg.[3]
+        holder.itemPriceEachTv.setText("₹ "+price);
 
         //handle remove click listener, delete item from cart
         holder.itemRemoveTv.setOnClickListener(new View.OnClickListener() {
